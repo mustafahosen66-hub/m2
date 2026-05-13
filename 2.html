@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الرواتب الذكية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+   <style>
+        :root {
+            --accent: #4f46e5;
+            --glass: rgba(255, 255, 255, 0.9);
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            /* خلفية احترافية متدرجة مع تموجات */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        /* حاوية النجاح العائمة */
+        .toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: #10b981; color: white; padding: 15px 35px;
+            border-radius: 50px; font-weight: bold; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            z-index: 9999; transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .toast.show { top: 30px; }
+
+        .main-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 45px 35px;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+
+.card:hover { transform: translateY(-5px); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #4361ee;
+        }
+
+
+
+        .header h1 { font-size: 26px; font-weight: 900; color: var(--accent); margin: 0; }
+        .header p { color: #64748b; font-size: 14px; margin-bottom: 35px; }
+
+        .form-group { margin-bottom: 25px; position: relative; text-align: right; }
+        .form-group label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 10px; color: #475569; padding-right: 5px; }
+
+        input {
+            width: 100%; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 20px;
+            font-family: 'Cairo'; font-size: 16px; box-sizing: border-box; background: white;
+            transition: 0.3s; color: var(--text); font-weight: 600;
+        }
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1); }
+
+        /* صندوق الاقتراحات */
+        .suggestions-box {
+            position: absolute; top: 100%; left: 0; right: 0; background: white;
+            border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            z-index: 1000; display: none; margin-top: 10px; overflow: hidden;
+        }
+        .suggestion-item { padding: 15px 20px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 600; }
+        .suggestion-item:hover { background: #f5f7ff; color: var(--accent); }
+
+        /* الأرقام المخفية برمجياً لكن موجودة للتنسيق */
+        #infoGrid { display: none; }
+
+        button {
+            width: 100%; padding: 18px; background: var(--accent);
+            color: white; border: none; border-radius: 20px; font-size: 18px; font-weight: 800;
+            cursor: pointer; transition: 0.4s; margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4); }
+        button:disabled { background: #94a3b8; cursor: wait; transform: none; }
+
+        .loader-spinner {
+            display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* الجدول المتطور */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: right; padding: 15px; color: #a3aed0; font-size: 0.85rem; border-bottom: 1px solid #e9edf7; }
+        td { padding: 15px; border-bottom: 1px solid #f4f7fe; font-size: 0.95rem; }
+        .badge-price { background: #e6faf5; color: var(--success); padding: 6px 12px; border-radius: 10px; font-weight: bold; }
+
+        /* التنبيه (Toast) */
+        .toast {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: white; padding: 15px 35px;
+            border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 2000; display: none; font-weight: bold;
+        }
+
+        /* رسالة الخطأ */
+        .no-data-msg { color: var(--danger); text-align: center; display: none; padding: 10px; }
+
+
+        /* زر تسجيل الخروج */.logout-btn {
+
+
+    background-color: #ff4757; /* لون أحمر جذاب للخروج */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px; /* حواف دائرية */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s; /* تأثير حركة ناعم */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* ظل خفيف */
+}
+
+    </style>
+</head>
+<body>
+
+<div id="successToast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span>تم حفظ البيانات بنجاح ✅</span>
+</div>
+
+<div class="main-card">
+    <div class="header">
+        <i class="fas fa-university" style="font-size: 2rem; color: var(--primary);"></i>
+        <h1>بوابة الرواتب الذكية</h1>
+        <p style="font-size: 13px; color: #64748b;">شركة صادق الإيمان</p>
+    </div>
+
+    <div class="form-group">
+        <label style="font-weight: 600; font-size: 14px;">اسم العميل</label>
+        <input type="text" id="searchInput" placeholder="ابحث عن الاسم..." oninput="searchNames()" autocomplete="off">
+        <div id="suggestions" class="suggestions-box"></div>
+    </div>
+
+    <div id="infoGrid" class="info-grid">
+        <div class="info-box rem">
+            <span style="font-size: 11px;">المتبقي</span>
+            <span id="txtRemaining" style="font-weight: 700;">0</span>
+        </div>
+        <div class="info-box ded">
+            <span style="font-size: 11px;">الاستقطاع</span>
+            <span id="txtDeduction" style="font-weight: 700;">0</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label style="font-weight: 600; font-size: 14px;">المبلغ المستلم</label>
+        <input type="number" id="salaryInput" placeholder="0.00">
+    </div>
+
+    <button id="saveBtn" onclick="processSave()">
+        <span id="btnText">حفظ العملية الآن</span>
+        <div id="loader" class="spinner"></div>
+    </button>
+
+<button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+ <div class="card" style="text-align: left; margin-left: 20px;">
+    <div class="card-header"><i class="fas fa-history"></i> السجل اللحظي (محدث تلقائياً)</div>
+    <div class="table-container">
+        <table style="text-align: left; width: 100%;">
+            <thead>
+                <tr>
+                    <th>العميل</th>
+                    <th>قيمت الراتب في الشريط</th>
+                    <th>التوقيت والتاريخ</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+
+
+ 1.
+    const loginTime = localStorage.getItem('loginTime');
+    const fiveHoursInMs = 5 * 60 * 60 * 1000; // 5 ساعات بالملي ثانية
+
+    // 2. التحقق فوراً: هل مر الوقت بالفعل？
+    if (!loginTime || (new Date().getTime() - loginTime > fiveHoursInMs)) {
+        localStorage.clear();
+        window.location.href = "index.html";
+    } else {
+        // 3. إذا لم يمر الوقت، نبدأ عداداً للخروج التلقائي عند انتهاء المدة المتبقية
+        const timeLeft = fiveHoursInMs - (new Date().getTime() - loginTime);
+        
+        setTimeout(() => {
+            alert("انتهت جلسة العمل الخاصة بك. سيتم تحويلك لصفحة الدخول.");
+            localStorage.clear();
+            window.location.href = "index.html";
+        }, timeLeft);
+    }
+
+
+
+// التحقق من حالة الدخول عند فتح الصفحة
+   if (!localStorage.getItem('userphone')) {
+        window.location.href = "index.html"; 
+    }
+
+        // يقوم بالتحقق إذا كان هناك هاتف محفوظ في الـ LocalStorage
+    // إذا لم يجد شيئاً، فإنه يعيد المستخدم لصفحة تسجيل الدخول
+    
+   // ننتظر تحميل الصفحة بالكامل
+    window.onload = function() {
+        const savedPhone = localStorage.getItem('userphone');
+        
+        // إذا لم توجد بيانات، نطرده. إذا وجدت، نترك الصفحة تعمل.
+        if (!savedPhone) {
+            console.log("لا توجد بيانات، جاري الإعادة لصفحة الدخول...");
+            window.location.href = "index.html";
+        } else {
+            console.log("تم التحقق من الدخول بنجاح للمستخدم: " + savedPhone);
+        }
+    };
+
+
+
+
+
+
+
+
+
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx1O4MgojTFJcE3Me32MIDybNASO_Mit1zSJvMxHkQzZ1HV0FMxHpOWqkxfvgIBqq0v/exec';
+    let allClientsData = [];
+    let selectedClientData = null;
+
+    // تحميل البيانات عند فتح الصفحة لسرعة البحث
+    window.onload = async () => {
+        const btn = document.getElementById('saveBtn');
+        const btnText = document.getElementById('btnText');
+        try {
+            btn.disabled = true;
+            btnText.innerText = "جاري التحميل...";
+            const response = await fetch(`${API_URL}?action=getNames`);
+            allClientsData = await response.json();
+            btn.disabled = false;
+            btnText.innerText = "حفظ العملية الآن";
+        } catch (e) {
+            btnText.innerText = "خطأ في الاتصال";
+        }
+    };
+
+    function searchNames() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        const box = document.getElementById('suggestions');
+        if (query.length < 2) { box.style.display = 'none'; return; }
+
+        const filtered = allClientsData.filter(c => c.name.toLowerCase().includes(query)).slice(0, 5);
+        
+        box.innerHTML = '';
+        if (filtered.length > 0) {
+            filtered.forEach(client => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerText = client.name;
+                div.onclick = () => selectClient(client);
+                box.appendChild(div);
+            });
+            box.style.display = 'block';
+        } else { box.style.display = 'none'; }
+    }
+
+    function selectClient(client) {
+    selectedClientData = client;
+    document.getElementById('searchInput').value = client.name;
+    document.getElementById('suggestions').style.display = 'none';
+    
+    // إظهار شبكة المعلومات (المتبقي والاستقطاع)
+    document.getElementById('infoGrid').style.display = 'grid';
+    
+    // عرض المبالغ في خانات المعلومات (اختياري حسب رغبتك)
+    const rem = Number(client.remaining) || 0;
+    const ded = Number(client.deduction) || 0;
+    document.getElementById('txtRemaining').innerText = rem.toLocaleString() + " د.ع";
+    document.getElementById('txtDeduction').innerText = ded.toLocaleString() + " د.ع";
+    
+    // --- هذا هو التعديل الذي طلبته ---
+    // جعل خانة "المبلغ المستلم" فارغة تماماً للإدخال اليدوي
+    document.getElementById('salaryInput').value = ''; 
+    
+    // وضع المؤشر (Focus) داخل الخانة فوراً لتسهيل الكتابة
+    document.getElementById('salaryInput').focus();
+}
+
+    // الدالة التي كانت تسبب الخطأ تم التأكد من اسمها ومكانها
+    async function processSave() {
+        const salary = document.getElementById('salaryInput').value;
+        const btn = document.getElementById('saveBtn');
+        const loader = document.getElementById('loader');
+        const btnText = document.getElementById('btnText');
+        const toast = document.getElementById('successToast');
+
+        if (!selectedClientData || !salary) {
+            alert("يرجى اختيار عميل وإدخال المبلغ");
+            return;
+        }
+
+        btn.disabled = true;
+        loader.style.display = 'block';
+        btnText.innerText = "جاري الحفظ...";
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    action: "updateSalary",
+                    customerName: selectedClientData.name,
+                    salaryValue: salary,
+                    deduction: selectedClientData.deduction,
+                    remaining: selectedClientData.remaining
+                })
+            });
+
+            // إظهار رسالة النجاح الاحترافية
+            toast.classList.add('show');
+
+            // تصفير الحقول يدوياً
+            document.getElementById('searchInput').value = '';
+            document.getElementById('salaryInput').value = '';
+            document.getElementById('infoGrid').style.display = 'none';
+            selectedClientData = null;
+
+            // إخفاء الرسالة بعد 3 ثوانٍ
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+
+        } catch (e) {
+            alert("حدث خطأ أثناء الحفظ");
+        } finally {
+            btn.disabled = false;
+            loader.style.display = 'none';
+            btnText.innerText = "حفظ العملية الآن";
+        }
+    }
+
+
+
+async function loadHistory() {
+        try {
+            const response = await fetch(`${API_URL}?action=getHistory`);
+            const history = await response.json();
+            const body = document.getElementById('historyBody');
+            body.innerHTML = '';
+            history.forEach(row => {
+                const tr = document.createElement('tr');
+                const dateFormatted = new Date(row.date).toLocaleString('ar-EG', {
+                    hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+                tr.innerHTML = `
+                    <td><strong>${row.name}</strong></td>
+                    <td><span class="badge-price">${Number(row.salary).toLocaleString()} د.ع</span></td>
+                    <td style="color: #707eae;">${dateFormatted}</td>
+                `;
+                body.appendChild(tr);
+            });
+        } catch (error) { console.error("خطأ أثناء تحميل السجل:", error); }
+    }
+
+    function formatInputCurrency(input) {
+        let value = input.value.replace(/,/g, '');
+        if(!isNaN(value) && value !== "") {
+            input.value = Number(value).toLocaleString('en-US');
+        }
+    }
+
+
+function logout() {
+    // 1. مسح جميع بيانات المستخدم من ذاكرة المتصفح
+    localStorage.clear();
+    
+    // 2. التوجيه المباشر إلى صفحة index.html
+    window.location.href = "index.html";
+}
+
+
+
+    setInterval(loadHistory, 1000);
+
+
+</script>
+</body>
+</html>

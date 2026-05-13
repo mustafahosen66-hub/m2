@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* التنسيق الجمالي للواجهة */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #27ae60, #2c3e50);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 350px;
+            text-align: center;
+        }
+        h2 { color: #2c3e50; margin-bottom: 25px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box; /* لضمان عدم خروج المدخل عن الحواف */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #219150; }
+        .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    
+
+<div class="login-card">
+        <h2>شركة الصادق </h2>
+        <p>  تسجيل الدخول</p>
+        <form id="loginForm">
+            <input type="text" id="phone" placeholder="رقم الهاتف" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <button type="submit">دخول</button>
+        </form>
+        <p class="footer-text">ليس لديك حساب؟ <a href="3.htm">إنشاء حساب جديد</a></p>
+    </div>
+
+
+
+
+
+    <script>
+
+
+    // إجبار الخروج بعد 5 ساعات بالضبط حتى لو كان المستخدم في الصفحة
+
+    // 1. رابط الـ Web App الخاص بك (تأكد أنه آخر نسخة منشورة بوضع Anyone)
+   
+    // 1. رابط الـ Web App الخاص بك
+    // هذا الكود يعمل بمجرد فتح الصفحة
+
+
+
+    
+    // 1. رابط الـ Web App الخاص بك (تأكد أنه آخر نسخة منشورة بوضع Anyone)
+   
+    // 1. رابط الـ Web App الخاص بك
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz1LRuELwElRV2_moBINKxv746wP35aRJylmV3N5Xeq2wz6cgaN3cY4-GrQfFcVY08h/exec';
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+
+        // جلب المدخلات
+        const inputPhone = document.getElementById('phone').value.trim(); 
+        const inputPassword = document.getElementById('password').value.trim();
+
+        // تعطيل الزر مؤقتاً
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.innerText = "جاري التحقق...";
+
+        fetch(scriptURL + "?action=getUsers")
+            .then(response => response.json())
+            .then(users => {
+                const user = users.find(u => 
+                    u.phone && String(u.phone).trim() === inputPhone && 
+                    u.password && String(u.password).trim() === inputPassword
+                );
+if (user) {
+
+    localStorage.clear(); // مسح أي بيانات سابقة في LocalStorage
+                    localStorage.setItem('username', user.username); // حفظ الاسم
+                    localStorage.setItem('userphone', user.phone);      // حفظ الهاتف
+                    // 3. تأخير بسيط للتأكد من حفظ البيانات قبل الانتقال
+localStorage.setItem('loginTime', new Date().getTime());
+
+    setTimeout(() => {
+        window.location.href = "2.html";
+    }, 100); // الانتقال إلى الصفحة الرئيسية بعد تسجيل الدخول
+              
+                } else {
+                    alert('خطأ: رقم الهاتف أو كلمة المرور غير مطابقة !');
+                    btn.disabled = false;
+                    btn.innerText = "دخول";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('فشل الاتصال: تأكد من تشغيل Live Server');
+                btn.disabled = false;
+                btn.innerText = "دخول";
+            });
+    });
+
+
+
+        
+    </script>
+</body>
+</html>
