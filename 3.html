@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب جديد - تطبيق أسعار</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .signup-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+        .signup-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* لضمان عدم خروج الإدخال عن الإطار */
+        }
+        .btn-signup {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .btn-signup:hover {
+            background-color: #218838;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-container">
+    <h2>إنشاء حساب</h2>
+    <form id="signupForm">
+        <div class="form-group">
+            <label for="username">الاسم الكامل:</label>
+            <input type="text" id="username" name="username" required placeholder="أدخل اسمك">
+        </div>
+        <div class="form-group">
+    <label for="phone">رقم الهاتف:</label>
+    <input type="tel" id="phone" name="phone" required placeholder="07XXXXXXXX" pattern="[0-9]{10,11}">
+</div>
+        <div class="form-group">
+            <label for="password">كلمة المرور:</label>
+            <input type="password" id="password" name="password" required placeholder="********">
+        </div>
+        <button type="submit" class="btn-signup">إنشاء الحساب</button>
+    </form>
+    <div class="login-link">
+        لديك حساب بالفعل؟ <a href="index.html">سجل دخولك هنا</a>
+    </div>
+</div>
+
+<script>
+   
+   
+   
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz50YvyaECGmOK1t7dT8kxfT7GAN3xX5xw7P2gFyKlRl34n_koY3UmzRC6GInNQAfS_/exec';
+
+    // نستخدم فقط النموذج الموجود في هذه الصفحة وهو signupForm
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('username').value;
+        const phone = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ "username": name, "phone": phone, "password": password }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(() => {
+            alert('تم إنشاء الحساب بنجاح!');
+            window.location.href = "2.html"; // التوجه لتسجيل الدخول
+        });
+    });
+
+
+
+
+
+   
+</script>
+
+</body>
+</html>
